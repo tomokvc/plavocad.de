@@ -1,10 +1,10 @@
-Optional: Schriften fuer PlavoCAD
+Schriften für PlavoCAD (optional)
 
-Die Website braucht diese Dateien NICHT. Ohne sie verwendet sie automatisch
-vorinstallierte Schriften (Mac/iPhone: Avenir Next Condensed, Windows: Bahnschrift,
-Android: Roboto Condensed). Wer exakt Barlow Condensed / IBM Plex moechte, legt hier ab:
+Die Website funktioniert ohne diese Dateien und nimmt dann vorinstallierte Ersatzschriften
+(Mac/iPhone: Avenir Next Condensed, Windows: Bahnschrift, Android: Roboto Condensed).
+Für das exakte Schriftbild die Schriften kostenlos bei fonts.google.com herunterladen
+(Barlow Condensed, IBM Plex Sans, IBM Plex Mono), als .woff2 speichern und hier so benennen:
 
-  barlow-condensed-500.woff2   (Barlow Condensed, Gewicht 500)
   barlow-condensed-600.woff2   (Barlow Condensed, Gewicht 600)
   barlow-condensed-700.woff2   (Barlow Condensed, Gewicht 700)
   ibm-plex-sans-400.woff2   (IBM Plex Sans, Gewicht 400)
@@ -13,4 +13,4 @@ Android: Roboto Condensed). Wer exakt Barlow Condensed / IBM Plex moechte, legt 
   ibm-plex-mono-400.woff2   (IBM Plex Mono, Gewicht 400)
   ibm-plex-mono-500.woff2   (IBM Plex Mono, Gewicht 500)
 
-Quelle: https://gwfh.mranftl.com/fonts (Format woff2, Dateien wie oben benennen).
+Die Schriften liegen dann auf Ihrem eigenen Server. Beim Seitenaufruf wird nichts an Google übertragen.
