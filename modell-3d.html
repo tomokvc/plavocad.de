@@ -9,14 +9,15 @@
 <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 <style>
 /* Schriften lokal (keine Verbindung zu Google) - Dateien liegen in fonts/ */
-@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/barlow-condensed-500.woff2') format('woff2'); }
-@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/barlow-condensed-600.woff2') format('woff2'); }
-@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/barlow-condensed-700.woff2') format('woff2'); }
-@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/ibm-plex-sans-400.woff2') format('woff2'); }
-@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/ibm-plex-sans-500.woff2') format('woff2'); }
-@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/ibm-plex-sans-600.woff2') format('woff2'); }
-@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/ibm-plex-mono-400.woff2') format('woff2'); }
-@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/ibm-plex-mono-500.woff2') format('woff2'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/barlow-condensed-500.woff') format('woff'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/barlow-condensed-600.woff') format('woff'); }
+@font-face { font-family: 'Barlow Condensed'; font-style: normal; font-weight: 700; font-display: swap; src: url('fonts/barlow-condensed-700.woff') format('woff'); }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/ibm-plex-sans-400.woff') format('woff'); }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/ibm-plex-sans-500.woff') format('woff'); }
+@font-face { font-family: 'IBM Plex Sans'; font-style: normal; font-weight: 600; font-display: swap; src: url('fonts/ibm-plex-sans-600.woff') format('woff'); }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 400; font-display: swap; src: url('fonts/ibm-plex-mono-400.woff') format('woff'); }
+@font-face { font-family: 'IBM Plex Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url('fonts/ibm-plex-mono-500.woff') format('woff'); }
+*, *::before, *::after { border-radius: 0 !important; box-shadow: none !important; }
 </style>
 <style>
 :root { --blue: #2458e8; --blue-deep: #163aa6; --blue-ink: #0e2a7a; --blue-wash: #e8eefd; --paper: #f7f7f3; --ink: #141a22; --muted: #5b6470; --rule: #d5d8d0;
@@ -107,7 +108,7 @@ footer a { color: var(--ink); text-decoration: none; } footer a:hover { color: v
   <a href="index.html" class="logo" aria-label="PlavoCAD – Startseite">
     <svg viewBox="0 0 409 100" aria-hidden="true" focusable="false"><rect x="1.5" y="1.5" width="406" height="97" fill="#ffffff"/><rect x="1.5" y="1.5" width="98.5" height="97" fill="#2458e8"/><g transform="translate(30.0 15)"><path d="M6.5 70 V6.5 H24 C34 6.5 36.5 12 36.5 22.25 C36.5 32.5 34 38 24 38 H6.5" transform="translate(0.00 0) scale(1.0)" fill="none" stroke="#ffffff" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/></g><path d="M100 1.5V98.5" stroke="#141a22" stroke-width="3"/><rect x="1.5" y="1.5" width="406.2" height="97" fill="none" stroke="#141a22" stroke-width="3"/><g transform="translate(116 25)"><path d="M6.5 70 V6.5 H24 C34 6.5 36.5 12 36.5 22.25 C36.5 32.5 34 38 24 38 H6.5" transform="translate(0.00 0) scale(0.72)" fill="none" stroke="#141a22" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><path d="M6.5 0 V63.5 H34" transform="translate(34.56 0) scale(0.72)" fill="none" stroke="#141a22" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><path d="M6 70 L18.5 6.5 H25.5 L38 70 M11.5 48 H32.5" transform="translate(64.80 0) scale(0.72)" fill="none" stroke="#141a22" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><path d="M6 0 L18.5 63.5 H25.5 L38 0" transform="translate(102.24 0) scale(0.72)" fill="none" stroke="#141a22" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><path d="M6.5 19 A12.5 12.5 0 0 1 19 6.5 H23 A12.5 12.5 0 0 1 35.5 19 V51 A12.5 12.5 0 0 1 23 63.5 H19 A12.5 12.5 0 0 1 6.5 51 Z" transform="translate(139.68 0) scale(0.72)" fill="none" stroke="#141a22" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><path d="M39 6.5 H19 A12.5 12.5 0 0 0 6.5 19 V51 A12.5 12.5 0 0 0 19 63.5 H39" transform="translate(175.68 0) scale(0.72)" fill="none" stroke="#2458e8" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><path d="M6 70 L18.5 6.5 H25.5 L38 70 M11.5 48 H32.5" transform="translate(209.52 0) scale(0.72)" fill="none" stroke="#2458e8" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/><path d="M6.5 6.5 H23 A12.5 12.5 0 0 1 35.5 19 V51 A12.5 12.5 0 0 1 23 63.5 H6.5 Z" transform="translate(246.96 0) scale(0.72)" fill="none" stroke="#2458e8" stroke-width="13" stroke-linejoin="miter" stroke-miterlimit="6"/></g></svg>
   </a>
-  <a class="back" href="index.html#beispiel">← Zum Beispielprojekt</a>
+  <a class="back" href="planer.html#beispiel">← Zum Beispielprojekt</a>
 </div></header>
 <main><div class="wrap">
   <div class="head">

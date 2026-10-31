@@ -1,16 +1,16 @@
-Schriften für PlavoCAD (optional)
+Schriften für PlavoCAD
 
-Die Website funktioniert ohne diese Dateien und nimmt dann vorinstallierte Ersatzschriften
-(Mac/iPhone: Avenir Next Condensed, Windows: Bahnschrift, Android: Roboto Condensed).
-Für das exakte Schriftbild die Schriften kostenlos bei fonts.google.com herunterladen
-(Barlow Condensed, IBM Plex Sans, IBM Plex Mono), als .woff2 speichern und hier so benennen:
+Alle Schriften liegen hier lokal auf Ihrem Server. Beim Seitenaufruf wird nichts an Google übertragen.
+Sie stehen unter der SIL Open Font License 1.1 (siehe OFL-*.txt) und dürfen auf der Website genutzt werden.
+Sie sind auf lateinische Zeichen reduziert, damit die Seite schnell lädt.
 
-  barlow-condensed-600.woff2   (Barlow Condensed, Gewicht 600)
-  barlow-condensed-700.woff2   (Barlow Condensed, Gewicht 700)
-  ibm-plex-sans-400.woff2   (IBM Plex Sans, Gewicht 400)
-  ibm-plex-sans-500.woff2   (IBM Plex Sans, Gewicht 500)
-  ibm-plex-sans-600.woff2   (IBM Plex Sans, Gewicht 600)
-  ibm-plex-mono-400.woff2   (IBM Plex Mono, Gewicht 400)
-  ibm-plex-mono-500.woff2   (IBM Plex Mono, Gewicht 500)
-
-Die Schriften liegen dann auf Ihrem eigenen Server. Beim Seitenaufruf wird nichts an Google übertragen.
+  barlow-condensed-500.woff   (Barlow Condensed, Gewicht 500)
+  barlow-condensed-600.woff   (Barlow Condensed, Gewicht 600)
+  barlow-condensed-700.woff   (Barlow Condensed, Gewicht 700)
+  ibm-plex-sans-300.woff   (IBM Plex Sans, Gewicht 300)
+  ibm-plex-sans-400.woff   (IBM Plex Sans, Gewicht 400)
+  ibm-plex-sans-500.woff   (IBM Plex Sans, Gewicht 500)
+  ibm-plex-sans-600.woff   (IBM Plex Sans, Gewicht 600)
+  ibm-plex-mono-400.woff   (IBM Plex Mono, Gewicht 400)
+  ibm-plex-mono-500.woff   (IBM Plex Mono, Gewicht 500)
+  nothing-you-could-do-400.woff   (Nothing You Could Do, Gewicht 400)
