@@ -1,7 +1,0 @@
- wrangler.jsonc
-   .assetsignore
-   .git
-   .github
-   README.md
-   functions
-   js/site.js
