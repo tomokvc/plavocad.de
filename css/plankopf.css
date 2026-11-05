@@ -5,7 +5,7 @@
 .pkf .cell.w2 { grid-column: span 2; } .pkf .cell.w4 { grid-column: span 4; }
 .pkf .cell.last { border-bottom: 0; }
 .pkf label, .pkf .lb { font: 500 .64rem/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--pk-muted); }
-.pkf input, .pkf textarea, .pkf select { border: 0; border-radius: 0; background: transparent; font: 500 1rem var(--mono); color: var(--pk-ink); padding: 4px 0 2px; width: 100%; min-height: 34px; }
+.pkf input, .pkf textarea, .pkf select { border: 0; border-radius: 0; background: transparent; font: 500 1rem var(--mono); color: var(--pk-ink); padding: 4px 0 2px; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; min-height: 34px; }
 .pkf textarea { resize: vertical; min-height: 58px; line-height: 1.45; }
 .pkf select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 22px;
   background-image: linear-gradient(45deg, transparent 50%, var(--pk-ink) 50%), linear-gradient(-45deg, transparent 50%, var(--pk-ink) 50%);

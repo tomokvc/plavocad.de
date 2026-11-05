@@ -1,0 +1,21 @@
+/* Über mich: eigene Seite mit dem Plankopf Planverfasser */
+body.ub { padding-bottom: 0; }
+.ubnav { margin-left: auto; display: flex; gap: 0; border: 1px solid var(--ink); }
+.ubnav a { padding: 8px 14px; font: 500 .78rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink); text-decoration: none; }
+.ubnav a + a { border-left: 1px solid var(--ink); }
+.ubnav a:hover { background: var(--ink); color: var(--sheet); }
+.ubhead { padding-top: 56px; display: flex; flex-direction: column; gap: 14px; }
+.ubhead h1 { margin: 0; font: 700 clamp(2.6rem, 6vw, 4.4rem)/.95 var(--display); text-transform: uppercase; letter-spacing: .01em; }
+body.ub .tb { margin-top: 28px; }
+body.ub .tbin { grid-template-columns: 220px minmax(0, 5fr) minmax(0, 6fr); }
+body.ub .tbabout p { font-size: 1rem; }
+body.ub .tbabout .hi { font: 600 1.5rem/1.2 var(--display); text-transform: none; color: var(--ink); }
+.ubdoors { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--ink); }
+.ubdoors a { position: relative; padding: 18px 64px 20px 20px; display: flex; flex-direction: column; gap: 4px; color: var(--ink); text-decoration: none; background: var(--sheet); }
+.ubdoors a + a { border-left: 1px solid var(--ink); }
+.ubdoors .h { font: 700 1.6rem/1.1 var(--display); text-transform: uppercase; }
+.ubdoors .ar { position: absolute; right: 20px; top: 50%; transform: translateY(-50%); font: 500 1.6rem var(--mono); }
+.ubdoors a:hover { background: var(--ink); color: var(--sheet); }
+.ubdoors a:hover .label { color: var(--sheet); }
+@media (max-width: 900px) { body.ub .tbin { grid-template-columns: 140px minmax(0, 1fr); } }
+@media (max-width: 560px) { body.ub .tbin { grid-template-columns: 104px minmax(0, 1fr); } .ubdoors { grid-template-columns: 1fr; } .ubdoors a + a { border-left: 0; border-top: 1px solid var(--ink); } .ubnav a { padding: 7px 8px; font-size: .64rem; letter-spacing: .04em; } }

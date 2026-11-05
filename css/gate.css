@@ -81,3 +81,4 @@ img { max-width: 100%; }
 /* sehr niedrige Bildschirme (Handy quer): dann darf gescrollt werden */
 @media (max-height: 520px) { .gate { height: auto; min-height: 100dvh; overflow: visible; } .stage { container-type: normal; } .split { width: min(100%, 640px); } }
 @media (prefers-reduced-motion: reduce) { .split.anim .exp, .split.anim .dwg, .split.anim .seam, .split.anim .tg, .go, .go .ar { transition: none; } }
+@media (max-width: 520px) { .legal .ubl { display: none; } }
