@@ -136,3 +136,13 @@
   .lsfiles li { animation: none; }
   .xb i::before, .xb i::after, .pv3d, .pvplan .x-f, .pvplan .x-a, .pvwfl, .lsrow { transition: none; }
 }
+
+/* Startaktion: Hinweis im Stil des Flyers, endet automatisch (makler.js blendet ihn nach dem Datum aus) */
+:root { --akt: #b3321c; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --akt: #ff8a72; } }
+:root[data-theme="dark"] { --akt: #ff8a72; }
+.aktion { position: relative; margin: 6px 0 0; border: 1px solid var(--akt); background: var(--sheet); padding: 16px 16px 14px; }
+.aktion .ak-l { position: absolute; top: -9px; left: 12px; background: var(--paper); padding: 0 6px; font: 500 .68rem/1.3 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--akt); }
+.aktion p { margin: 0; font-size: .95rem; line-height: 1.5; color: var(--ink); }
+.aktion b { font-weight: 600; }
+.aktion[hidden] { display: none; }

@@ -1,8 +1,8 @@
-   {
-     "name": "plavocad-de",
-     "compatibility_date": "2026-11-05",
-     "assets": {
-       "directory": ".",
-       "not_found_handling": "404-page"
-     }
-   }
+{
+  "name": "plavocad-de",
+  "compatibility_date": "2026-11-05",
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "404-page"
+  }
+}

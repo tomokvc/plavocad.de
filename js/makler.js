@@ -18,6 +18,10 @@
   const fine = window.matchMedia('(pointer: fine)').matches;
   const pad = n => String(n).padStart(2, '0'), now = new Date();
 
+  /* Startaktion nach Ablauf ausblenden */
+  const akt = $('#aktion');
+  if (akt && now > new Date(akt.dataset.bis)) akt.hidden = true;
+
   /* Plotdatum und Lieferscheinnummer */
   $('#plotdate').textContent = pad(now.getDate()) + '.' + pad(now.getMonth() + 1) + '.' + now.getFullYear() + ' · ' + pad(now.getHours()) + ':' + pad(now.getMinutes());
   $('#ls-no').textContent = 'Nr. PC-' + now.getFullYear() + pad(now.getMonth() + 1) + pad(now.getDate());
@@ -85,7 +89,7 @@
     files();
     planCell();
   }
-  const FILES = [['cf-exp', 'PDF', 'Grundriss_Wohnung.pdf', 'A4 quer'], ['cf-exp', 'PNG', 'Grundriss_Wohnung.png', '3000 px'], ['cf-wfl', 'PDF', 'Wohnflaeche_WoFlV.pdf', 'Tabelle'], ['cf-3d', 'PNG', '3D-Ansicht.png', '3000 px']];
+  const FILES = [['cf-exp', 'PDF', 'Grundriss_Wohnung.pdf', 'A4 quer'], ['cf-exp', 'PNG', 'Grundriss_Wohnung.png', '3000 px'], ['cf-wfl', 'PDF', 'Flaechenaufstellung.pdf', 'Tabelle'], ['cf-3d', 'PNG', '3D-Ansicht.png', '3000 px']];
   let lastFiles = '';
   function files() {
     const list = FILES.filter(f => document.getElementById(f[0]).checked);

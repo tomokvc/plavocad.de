@@ -563,6 +563,12 @@ body { --pk-ink: var(--ink); --pk-muted: var(--muted); --pk-sheet: var(--sheet);
 }
 @media (max-width: 420px) { .logo svg.lg-k { height: 30px; } }
 
+/* Hinweis auf das Planverzeichnis unter dem Beispiel */
+.moreref { margin: 22px 0 0; display: flex; justify-content: flex-end; }
+.moreref a { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 16px; border: 1px solid var(--ink); background: var(--sheet); color: var(--ink); font: 500 .8rem var(--mono); letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
+.moreref a:hover { border-color: var(--blue); color: var(--blue); }
+.ftbc .more + .more { margin-top: 0; padding-top: 2px; }
+
 body.plain { padding-bottom: 0; }
 
 </style>
