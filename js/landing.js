@@ -264,7 +264,7 @@
       }
       f.hidden = true;
       $('#done-nr').textContent = j.nr || '–';
-      $('#done-text').textContent = r.term.text + ' an ' + $('#f-mail').value.trim() + '. ' + (files.length ? '' : 'Bitte schicken Sie die Pläne noch per E-Mail oder WhatsApp. ') + 'Fehlt etwas, melde ich mich heute noch.';
+      $('#done-text').textContent = r.term.text + ' an ' + $('#f-mail').value.trim() + '. ' + (files.length ? '' : 'Bitte schicken Sie die Pläne noch per E-Mail oder WhatsApp. ') + 'Ich prüfe Ihre Unterlagen und bestätige den Auftrag am selben Werktag. Fehlt etwas, melde ich mich.';
       $('#done').hidden = false; $('#done').focus(); $('#done').scrollIntoView({ behavior: reduceM ? 'auto' : 'smooth', block: 'center' });
     } catch (e) {
       // Ersatzweg: vorbereitete E-Mail

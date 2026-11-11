@@ -79,20 +79,25 @@ async function order(request, env) {
   if (!res.ok) { console.error('Resend', res.status, await res.text()); throw new Error('mail'); }
 
   // Bestätigung an den Kunden (ohne Anhänge). Schlägt sie fehl, gilt die Bestellung trotzdem als angekommen.
+  const anfrage = v('art') === 'anfrage';
   const conf = [
     (name ? 'Guten Tag ' + name + ',' : 'Guten Tag,'), '',
-    'vielen Dank, Ihre ' + (v('art') === 'anfrage' ? 'Anfrage' : 'Bestellung') + ' ' + nr + ' ist bei mir angekommen.', '',
-    v('positionen'), '',
-    'Liefertermin: ' + v('termin'), '',
+    'vielen Dank, Ihre ' + (anfrage ? 'Anfrage' : 'Bestellung') + ' ' + nr + ' ist bei mir eingegangen.',
+    anfrage
+      ? 'Ich sehe mir Ihre Angaben an und schicke Ihnen ein schriftliches Angebot.'
+      : 'Dies ist eine automatische Eingangsbestätigung. Ich prüfe Ihre Unterlagen und bestätige den Auftrag am selben Werktag. Erst mit dieser Bestätigung kommt der Auftrag zustande.', '',
+    'Ihre Angaben:', v('positionen'), '',
+    (anfrage ? 'Wunschtermin: ' + (v('wunschtermin') || 'keiner angegeben') : 'Voraussichtlicher Liefertermin: ' + v('termin')), '',
     files.length ? files.length + ' Datei(en) sind angekommen.' : 'Bitte schicken Sie mir die Pläne noch per E-Mail (Antwort auf diese Nachricht) oder per WhatsApp an 0172 313 61 17.',
-    'Fehlt etwas, melde ich mich heute noch. Die Rechnung kommt erst nach der Lieferung.', '',
+    'Die Rechnung kommt erst nach der Lieferung.', '',
+    'Es gelten meine AGB: https://plavocad.de/agb', '',
     'Viele Grüße', 'Tomo Kovačević', 'PlavoCAD · 0172 313 61 17 · kontakt@plavocad.de'
-  ].join('\n');
+].join('\n');
   try {
     await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + env.RESEND_API_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: env.MAIL_FROM, to: [mail], reply_to: env.MAIL_TO, subject: 'Ihre Bestellung ' + nr + ' bei PlavoCAD', text: conf })
+      body: JSON.stringify({ from: env.MAIL_FROM, to: [mail], reply_to: env.MAIL_TO, subject: 'Eingangsbestätigung ' + nr + ' · PlavoCAD', text: conf })
     });
   } catch (e) { console.error('Bestätigung', e); }
   return json({ ok: true, nr });
