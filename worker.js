@@ -7,7 +7,7 @@
  * Benötigt (Cloudflare → Worker → Einstellungen → Variablen und Geheimnisse):
  *   RESEND_API_KEY  (Geheimnis)  API-Schlüssel von resend.com
  *   MAIL_TO         (Text)       z. B. kontakt@plavocad.de
- *   MAIL_FROM       (Text)       z. B. "PlavoCAD Website <formular@send.plavocad.de>"  (Domain muss bei Resend bestätigt sein)
+ *   MAIL_FROM       (Text)       z. B. "PlavoCAD Website <formular@plavocad.de>"  (Domain muss bei Resend bestätigt sein)
  */
 
 const MAX_FILES = 10;

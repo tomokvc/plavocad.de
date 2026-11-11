@@ -10,6 +10,6 @@
   },
   "vars": {
     "MAIL_TO": "kontakt@plavocad.de",
-    "MAIL_FROM": "PlavoCAD <formular@send.plavocad.de>"
+    "MAIL_FROM": "PlavoCAD <formular@plavocad.de>"
   }
 }
