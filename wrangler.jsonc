@@ -6,10 +6,19 @@
     "directory": ".",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*"]
+    "run_worker_first": ["/api/*", "/admin", "/admin/*"]
   },
+  // Nach dem Anlegen der Datenbank (siehe EINRICHTUNG.md, Schritt 2): die zwei Schrägstriche
+  // in den nächsten drei Zeilen entfernen und die Database ID eintragen.
+  // "d1_databases": [
+  //   { "binding": "DB", "database_name": "plavocad", "database_id": "HIER-DIE-ID" }
+  // ],
+  "triggers": { "crons": ["17 3 * * *"] },
   "vars": {
     "MAIL_TO": "kontakt@plavocad.de",
-    "MAIL_FROM": "PlavoCAD <formular@plavocad.de>"
+    "MAIL_FROM": "PlavoCAD <formular@plavocad.de>",
+    "ACCESS_TEAM": "",
+    "ACCESS_AUD": "",
+    "ADMIN_MAIL": ""
   }
 }
