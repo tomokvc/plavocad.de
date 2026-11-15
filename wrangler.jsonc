@@ -10,9 +10,9 @@
   },
   // Nach dem Anlegen der Datenbank (siehe EINRICHTUNG.md, Schritt 2): die zwei Schrägstriche
   // in den nächsten drei Zeilen entfernen und die Database ID eintragen.
-  // "d1_databases": [
-  //   { "binding": "DB", "database_name": "plavocad", "database_id": "HIER-DIE-ID" }
-  // ],
+  "d1_databases": [
+     { "binding": "DB", "database_name": "plavocad", "database_id": "6c104ce2-5b1e-4dbb-85cc-725e005b187d" }
+   ],
   "triggers": { "crons": ["17 3 * * *"] },
   "vars": {
     "MAIL_TO": "kontakt@plavocad.de",
