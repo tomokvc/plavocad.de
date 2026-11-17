@@ -429,8 +429,11 @@ async function zugang(request, env) {
     const kopf = JSON.parse(text64(teile[0])), inhalt = JSON.parse(text64(teile[1]));
     if (kopf.alg !== 'RS256') throw new Error('Verfahren');
     const iss = 'https://' + team + '.cloudflareaccess.com';
+    // Häufigster Einrichtungsfehler: falscher Team-Name. Die Anmeldung verrät den richtigen.
+    const tokTeam = String(inhalt.iss || '').replace(/^https:\/\//, '').replace(/\.cloudflareaccess\.com\/?$/, '');
+    if (inhalt.iss && inhalt.iss !== iss) throw new Error('ACCESS_TEAM ist „' + team + '“, die Anmeldung kommt aber vom Team „' + tokTeam + '“. Bitte ACCESS_TEAM auf „' + tokTeam + '“ setzen');
     if (!certs || Date.now() - certsZeit > 3600000 || !certs.some(k => k.kid === kopf.kid)) {
-      const r = await fetch(iss + '/cdn-cgi/access/certs'); if (!r.ok) throw new Error('Schlüssel nicht abrufbar');
+      const r = await fetch(iss + '/cdn-cgi/access/certs'); if (!r.ok) throw new Error('Schlüssel nicht abrufbar, HTTP ' + r.status + ' von ' + iss);
       certs = (await r.json()).keys || []; certsZeit = Date.now();
     }
     const jwk = certs.find(k => k.kid === kopf.kid); if (!jwk) throw new Error('Schlüssel unbekannt');
