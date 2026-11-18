@@ -439,10 +439,11 @@ async function vermerk(env, nr, was) {
 }
 
 /* ---------------- Admin: Anmeldung über Cloudflare Access ---------------- */
-let certs = null, certsZeit = 0;
+const certsCache = {};
 async function zugang(request, env) {
-  const team = String(env.ACCESS_TEAM || '').trim().replace(/^https?:\/\//, '').replace(/\.cloudflareaccess\.com.*$/, ''), aud = String(env.ACCESS_AUD || '').trim();
-  if (!team || !aud) return { ok: false, status: 503, text: 'Der Admin-Bereich ist noch nicht eingerichtet (ACCESS_TEAM und ACCESS_AUD fehlen).' };
+  // ACCESS_TEAM darf mehrere Team-Domains enthalten, mit Komma getrennt (z. B. nach einer Umbenennung).
+  const teams = String(env.ACCESS_TEAM || '').split(',').map(t => t.trim().replace(/^https?:\/\//, '').replace(/\.cloudflareaccess\.com.*$/, '')).filter(Boolean), aud = String(env.ACCESS_AUD || '').trim();
+  if (!teams.length || !aud) return { ok: false, status: 503, text: 'Der Admin-Bereich ist noch nicht eingerichtet (ACCESS_TEAM und ACCESS_AUD fehlen).' };
   let tok = request.headers.get('Cf-Access-Jwt-Assertion');
   if (!tok) { const m = /(?:^|;\s*)CF_Authorization=([^;]+)/.exec(request.headers.get('Cookie') || ''); if (m) tok = m[1]; }
   if (!tok) return { ok: false, status: 401, text: 'Nicht angemeldet. Bitte über Cloudflare Access anmelden.' };
@@ -450,14 +451,15 @@ async function zugang(request, env) {
     const teile = tok.split('.'); if (teile.length !== 3) throw new Error('Form');
     const kopf = JSON.parse(text64(teile[0])), inhalt = JSON.parse(text64(teile[1]));
     if (kopf.alg !== 'RS256') throw new Error('Verfahren');
-    const iss = 'https://' + team + '.cloudflareaccess.com';
-    // Häufigster Einrichtungsfehler: falscher Team-Name. Die Anmeldung verrät den richtigen.
     const tokTeam = String(inhalt.iss || '').replace(/^https:\/\//, '').replace(/\.cloudflareaccess\.com\/?$/, '');
-    if (inhalt.iss && inhalt.iss !== iss) throw new Error('ACCESS_TEAM ist „' + team + '“, die Anmeldung kommt aber vom Team „' + tokTeam + '“. Bitte ACCESS_TEAM auf „' + tokTeam + '“ setzen');
-    if (!certs || Date.now() - certsZeit > 3600000 || !certs.some(k => k.kid === kopf.kid)) {
+    if (!teams.includes(tokTeam)) throw new Error('ACCESS_TEAM ist „' + teams.join(', ') + '“, die Anmeldung kommt aber vom Team „' + tokTeam + '“. Bitte „' + tokTeam + '“ in ACCESS_TEAM ergänzen');
+    const iss = 'https://' + tokTeam + '.cloudflareaccess.com';
+    let c = certsCache[tokTeam];
+    if (!c || Date.now() - c.zeit > 3600000 || !c.keys.some(k => k.kid === kopf.kid)) {
       const r = await fetch(iss + '/cdn-cgi/access/certs'); if (!r.ok) throw new Error('Schlüssel nicht abrufbar, HTTP ' + r.status + ' von ' + iss);
-      certs = (await r.json()).keys || []; certsZeit = Date.now();
+      c = certsCache[tokTeam] = { keys: (await r.json()).keys || [], zeit: Date.now() };
     }
+    const certs = c.keys;
     const jwk = certs.find(k => k.kid === kopf.kid); if (!jwk) throw new Error('Schlüssel unbekannt');
     const key = await crypto.subtle.importKey('jwk', jwk, { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['verify']);
     const gut = await crypto.subtle.verify('RSASSA-PKCS1-v1_5', key, bytes64(teile[2]), new TextEncoder().encode(teile[0] + '.' + teile[1]));

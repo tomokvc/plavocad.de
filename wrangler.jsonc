@@ -15,7 +15,7 @@
   "vars": {
     "MAIL_TO": "kontakt@plavocad.de",
     "MAIL_FROM": "PlavoCAD <formular@plavocad.de>",
-    "ACCESS_TEAM": "plavocad",
+    "ACCESS_TEAM": "plavocad,bold-sky-ed49",
     "ACCESS_AUD": "6a71521e9e7ce755c20ff81e2b36214024cff756431e82465a1c1a3cda2d06a5",
     "ADMIN_MAIL": ""
   }
