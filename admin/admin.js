@@ -1,4 +1,5 @@
-/* PlavoCAD Admin: Bestellungen und Anfragen bearbeiten, E-Mails über Resend senden, Preise/Startaktion/Lieferzeit ändern.
+/* PlavoCAD Admin: Gerüst (Schnittstelle, Wege, Meldungen), Bestellungen und Website-Einstellungen.
+   Das Büro (Heute, Kunden, Akquise, Belege, Firma) steht in buero.js, Belege und PDF in beleg.js.
    Spricht nur mit /api/admin/* auf plavocad.de (Anmeldung über Cloudflare Access). Speichert nichts im Browser. Braucht preise.js. */
 (() => {
   'use strict';
@@ -90,22 +91,26 @@
 
   /* ---------- Detail ---------- */
   async function detail(nr) {
-    let b;
-    try { b = (await api('bestellungen/' + encodeURIComponent(nr))).b; } catch (e) { app.innerHTML = '<p class="card p-6">' + esc(e.message) + ' <a class="underline" href="#/">Zur Liste</a></p>'; return; }
+    let b, kontakt = null, belege = [];
+    try { const r = await api('bestellungen/' + encodeURIComponent(nr)); b = r.b; kontakt = r.kontakt || null; belege = r.belege || []; }
+    catch (e) { app.innerHTML = '<p class="card p-6">' + esc(e.message) + ' <a class="underline" href="#/bestellungen">Zur Liste</a></p>'; return; }
     const d = b.daten || {}, fe = d.felder || {}, dateien = d.dateien || [], anfrage = b.art === 'anfrage';
+    const rechnung = belege.find(x => x.art === 'rechnung' && x.status !== 'storniert'), angebot = belege.filter(x => x.art === 'angebot').pop();
     const schritt = {
-      neu: anfrage ? ['Angebot schicken', 'Angaben prüfen, Preis und Lieferplan festlegen, dann das Angebot senden.', [['mail:angebot', 'Angebot senden', 1], ['mail:absage', 'Absagen', 0]]]
+      neu: anfrage ? (angebot ? ['Antwort auf das Angebot abwarten', 'Angebot ' + angebot.nr + ' ist ' + (angebot.status === 'versendet' ? 'verschickt' : 'angelegt') + '. Nimmt die Verwaltung an, setze es im Angebot auf „Angenommen“.', [['beleg:' + angebot.id, 'Angebot öffnen', 1], ['mail:absage', 'Absagen', 0]]]
+                            : ['Angebot schicken', 'Angaben prüfen, dann das Angebot mit Richtpreis als PDF erstellen und senden.', [['angebot', 'Angebot erstellen', 1], ['mail:absage', 'Absagen', 0]]])
                    : ['Unterlagen prüfen und bestätigen', 'Die Pläne liegen in deinem Postfach (Betreff „… ' + b.nr + '“). Mit der Bestätigung kommt der Auftrag zustande.', [['mail:bestaetigung', 'Auftrag bestätigen', 1], ['mail:absage', 'Absagen', 0]]],
       bestaetigt: ['Zeichnen und liefern', 'Zugesagt bis ' + datum(b.liefertermin) + '.', [['mail:lieferung', 'Lieferung senden', 1], ['status:in_arbeit', 'In Arbeit setzen', 0]]],
       in_arbeit: ['Liefern', 'Zugesagt bis ' + datum(b.liefertermin) + '.', [['mail:lieferung', 'Lieferung senden', 1]]],
-      geliefert: b.preis ? ['Rechnung schreiben', 'Nach der Prüfung durch den Kunden: Rechnung im Büro-Tool schreiben, bei Zahlungseingang hier abschließen.', [['status:bezahlt', 'Als bezahlt markieren', 1], ['csv', 'Ins Büro-Tool übernehmen', 0]]]
-                         : ['Abschließen', 'Kostenlose Lieferung aus der Startaktion.', [['status:bezahlt', 'Abschließen', 1], ['csv', 'Ins Büro-Tool übernehmen', 0]]],
-      bezahlt: ['Abgeschlossen', 'Wird 12 Monate nach der letzten Änderung automatisch gelöscht.', [['csv', 'Ins Büro-Tool übernehmen', 0]]],
+      geliefert: !b.preis ? ['Abschließen', 'Kostenlose Lieferung aus der Startaktion.', [['status:bezahlt', 'Abschließen', 1]]]
+        : rechnung ? ['Zahlung abwarten', 'Rechnung ' + (rechnung.nr || '(Entwurf)') + ' über ' + pcEur(rechnung.summe) + '. Erfasse den Zahlungseingang an der Rechnung, dann wird diese Bestellung automatisch „Bezahlt“.', [['beleg:' + rechnung.id, 'Rechnung öffnen', 1]]]
+        : ['Rechnung schreiben', 'Nach der Prüfung durch den Kunden die Rechnung erstellen. Positionen und Preis kommen aus der Bestellung.', [['rechnung', 'Rechnung erstellen', 1], ['status:bezahlt', 'Ohne Rechnung abschließen', 0]]],
+      bezahlt: ['Abgeschlossen', 'Wird 12 Monate nach der letzten Änderung automatisch gelöscht. Rechnungen bleiben davon unberührt.', rechnung ? [['beleg:' + rechnung.id, 'Rechnung öffnen', 0]] : []],
       abgelehnt: ['Abgelehnt', 'Wird 6 Monate nach Eingang automatisch gelöscht.', []]
     }[b.status];
     const feld = (l, v) => v ? '<div class="p-4 border-b border-rule"><dt class="lbl">' + l + '</dt><dd class="mt-1 break-words">' + v + '</dd></div>' : '';
     app.innerHTML =
-      '<p class="mb-4"><a class="font-mono text-[.8rem] text-blue underline underline-offset-4" href="#/">← Alle Bestellungen</a></p>' +
+      '<p class="mb-4"><a class="font-mono text-[.8rem] text-blue underline underline-offset-4" href="#/bestellungen">← Alle Bestellungen</a></p>' +
       '<div class="flex flex-wrap items-center gap-3 mb-5"><h1 class="font-display font-bold uppercase text-[2rem] sm:text-[2.6rem] leading-none">' + esc(kunde(b)) + '</h1>' + tag(b.status) + (b.art !== 'bestellung' ? '<span class="tag border-ink text-ink">' + ART[b.art] + '</span>' : '') + '</div>' +
       '<div class="grid lg:grid-cols-12 gap-5 items-start">' +
       '<div class="lg:col-span-7 flex flex-col gap-5">' +
@@ -122,7 +127,7 @@
       '<aside class="lg:col-span-5 flex flex-col gap-5">' +
         '<section class="card"><dl>' +
           feld('Nummer', '<span class="font-mono">' + esc(b.nr) + '</span> <span class="text-muted">· eingegangen ' + zeit(b.erstellt) + '</span>') +
-          feld('Kunde', [b.name, b.firma].filter(Boolean).map(esc).join('<br>')) +
+          feld('Kunde', [b.name, b.firma].filter(Boolean).map(esc).join('<br>') + (kontakt ? '<br><a class="font-mono text-[.8rem] text-blue underline underline-offset-4" href="#/k/' + kontakt.id + '">Kundenkarte öffnen →</a>' : '')) +
           feld('E-Mail', '<a class="underline underline-offset-4" href="mailto:' + esc(b.mail) + '?subject=' + encodeURIComponent('Ihre Bestellung ' + b.nr) + '">' + esc(b.mail) + '</a>') +
           feld('Telefon', b.tel ? '<a class="underline underline-offset-4" href="tel:' + esc(b.tel.replace(/[^\d+]/g, '')) + '">' + esc(b.tel) + '</a>' : '') +
           '<div class="p-4 border-b border-rule grid grid-cols-2 gap-3"><label class="field"><span class="lbl">Preis in €</span><input class="inp font-mono" id="e-preis" type="number" min="0" step="0.01" inputmode="decimal" value="' + (b.preis || 0) + '"></label>' +
@@ -130,7 +135,8 @@
           '<div class="p-4 border-b border-rule"><label class="field"><span class="lbl">Status</span><select class="inp" id="e-status">' + Object.keys(ST).map(k => '<option value="' + k + '"' + (k === b.status ? ' selected' : '') + '>' + ST[k] + '</option>').join('') + '</select></label></div>' +
           '<div class="p-4"><label class="field"><span class="lbl">Notiz (nur für dich)</span><textarea class="inp min-h-[96px]" id="e-notiz" rows="3">' + esc(b.notiz || '') + '</textarea></label></div>' +
         '</dl></section>' +
-        '<div class="flex flex-wrap gap-2"><button type="button" class="btn-ghost" data-a="mail:nachricht">Nachricht senden</button><button type="button" class="btn-ghost" data-a="csv">Ins Büro-Tool</button><button type="button" class="btn-ghost !border-warn !text-warn ml-auto" data-a="loeschen">Löschen</button></div>' +
+        (belege.length ? '<section class="card"><h2 class="lbl px-4 pt-4">Belege</h2><ul class="divide-y divide-rule">' + belege.map(x => '<li><a class="flex items-center gap-3 px-4 py-3 hover:bg-wash" href="#/beleg/' + x.id + '"><span class="grow"><b>' + ({ angebot: 'Angebot', rechnung: 'Rechnung', storno: 'Stornorechnung' })[x.art] + '</b> <span class="font-mono text-[.84rem] text-muted">' + esc(x.nr || 'Entwurf') + ' · ' + esc(x.status) + '</span></span><b class="font-mono">' + pcEur(x.summe) + '</b></a></li>').join('') + '</ul></section>' : '') +
+        '<div class="flex flex-wrap gap-2"><button type="button" class="btn-ghost" data-a="mail:nachricht">Nachricht senden</button>' + (b.preis && !rechnung ? '<button type="button" class="btn-ghost" data-a="rechnung">Rechnung erstellen</button>' : '') + '<button type="button" class="btn-ghost !border-warn !text-warn ml-auto" data-a="loeschen">Löschen</button></div>' +
       '</aside></div>';
 
     const neu = async aenderung => { try { await api('bestellungen/' + encodeURIComponent(nr), { method: 'PATCH', json: aenderung }); toast('Gespeichert.'); await ladeListe(); detail(nr); } catch (e) { fehler(e); } };
@@ -141,11 +147,12 @@
     $$('[data-a]', app).forEach(btn => btn.onclick = async () => {
       const [a, wert] = btn.dataset.a.split(':');
       if (a === 'status') return neu({ status: wert });
-      if (a === 'csv') return csv(b);
+      if (a === 'rechnung' || a === 'angebot') return PCA.belegAusBestellung(b, kontakt, a);
+      if (a === 'beleg') { location.hash = '#/beleg/' + wert; return; }
       if (a === 'mail') return verfassen(b, wert);
       if (a === 'loeschen') {
         if (btn.dataset.sicher !== '1') { btn.dataset.sicher = '1'; btn.textContent = 'Wirklich löschen?'; setTimeout(() => { btn.dataset.sicher = ''; btn.textContent = 'Löschen'; }, 4000); return; }
-        try { await api('bestellungen/' + encodeURIComponent(nr), { method: 'DELETE' }); toast('Gelöscht.'); await ladeListe(); location.hash = '#/'; } catch (e) { fehler(e); }
+        try { await api('bestellungen/' + encodeURIComponent(nr), { method: 'DELETE' }); toast('Gelöscht.'); await ladeListe(); location.hash = '#/bestellungen'; } catch (e) { fehler(e); }
       }
     });
   }
@@ -194,18 +201,10 @@
     };
   }
 
-  /* Übergabe ans Büro-Tool: CSV mit einer Zeile, dort unter „Daten und Backup → CSV importieren“ einlesen */
-  function csv(b) {
-    const q = s => '"' + String(s === null || s === undefined ? '' : s).replace(/"/g, '""') + '"';
-    const d = b.daten || {}, notiz = ['Website-Bestellung ' + b.nr + ' vom ' + new Date(b.erstellt).toLocaleDateString('de-DE'), b.typ, b.objekt ? 'Objekt: ' + b.objekt : '', d.positionen || '', b.liefertermin ? 'Liefertermin: ' + datum(b.liefertermin) : ''].filter(Boolean).join('\n');
-    const kopf = ['Unternehmen', 'Ansprechpartner', 'E-Mail', 'Telefon', 'Quelle', 'Vertriebsphase', 'Geschätzter Auftragswert', 'Notizen'];
-    const zeile = [b.firma || b.name || b.mail, b.name, b.mail, b.tel, 'Website-Anfrage', '', String(b.preis || 0).replace('.', ','), notiz];
-    const blob = new Blob(['﻿' + kopf.map(q).join(';') + '\r\n' + zeile.map(q).join(';') + '\r\n'], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'PlavoCAD_' + b.nr + '.csv'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-    toast('Datei geladen. Im Büro-Tool: Daten und Backup → CSV importieren.');
-  }
-
   /* ---------- Einstellungen ---------- */
+  const reiter = aktiv => '<div class="flex gap-px bg-ink border border-ink mb-5 w-fit">' + [['website', 'Website und Preise', '#/einstellungen'], ['firma', 'Firma und Belege', '#/einstellungen/firma']]
+    .map(r => '<a href="' + r[2] + '" class="px-4 min-h-[44px] flex items-center font-mono text-[.76rem] uppercase tracking-[.08em] ' + (r[0] === aktiv ? 'bg-ink text-sheet' : 'bg-sheet hover:text-blue') + '">' + r[1] + '</a>').join('') + '</div>';
+  window.PCA_REITER = reiter;
   const PREISE = [['wohnung', 'Wohnung oder Etage'], ['flaechen', 'Flächen je Wohnung'], ['hausPaket', 'Haus bis 3 Ebenen (Paket)'], ['ebene', 'Weitere Wohnebene'], ['nebenebene', 'Keller / Dachboden'], ['flaechenHaus', 'Flächen Haus (ohne Paket)'],
     ['gewerbe', 'Gewerbeeinheit'], ['d3', '3D-Ansicht'], ['dachschraegen', 'Dachschrägen'], ['express', 'Express'], ['skizze', 'Nur Handskizze'], ['rabatt5', 'Nachlass ab 5 Wohnungen'], ['rabatt20', 'Nachlass ab 20 Wohnungen'],
     ['treppenhaus', 'Treppenhaus je Geschoss'], ['gemeinschaftskeller', 'Gemeinschaftskeller je Haus']];
@@ -213,7 +212,8 @@
     let r; try { r = await api('einstellungen'); } catch (e) { app.innerHTML = '<p class="card p-6">' + esc(e.message) + '</p>'; return; }
     const C = r.konfig, D = r.standard;
     const zahl = (g, k, l, extra = '') => '<label class="field"><span class="lbl">' + l + '</span><input class="inp font-mono" type="number" min="0" step="' + (g === 'preise' ? '0.5' : '1') + '" inputmode="decimal" data-g="' + g + '" data-k="' + k + '" value="' + C[g][k] + '"' + extra + '>' + (C[g][k] !== D[g][k] ? '<span class="text-[.76rem] text-muted">Standard: ' + D[g][k] + '</span>' : '') + '</label>';
-    app.innerHTML = '<h1 class="font-display font-bold uppercase text-[2rem] sm:text-[2.6rem] leading-none mb-2">Einstellungen</h1><p class="text-ink2 mb-6 max-w-[64ch]">Diese Werte zeigt die Website, und mit ihnen rechnet der Server jede Bestellung. Änderungen sind nach spätestens einer Minute sichtbar.</p>' +
+    app.innerHTML = '<h1 class="font-display font-bold uppercase text-[2rem] sm:text-[2.6rem] leading-none mb-4">Einstellungen</h1>' + reiter('website') +
+      '<p class="text-ink2 mb-6 max-w-[64ch]">Diese Werte zeigt die Website, und mit ihnen rechnet der Server jede Bestellung und jede Rechnung aus einer Bestellung. Änderungen sind nach spätestens einer Minute sichtbar.</p>' +
       '<form id="ef" class="grid lg:grid-cols-2 gap-5 items-start">' +
       '<section class="card"><h2 class="px-4 sm:px-5 py-3 border-b border-ink font-display uppercase text-[1.3rem]">Startaktion</h2><div class="p-4 sm:p-5 grid grid-cols-2 gap-4">' +
         '<label class="opt col-span-2"><input type="checkbox" data-g="aktion" data-k="an"' + (C.aktion.an ? ' checked' : '') + '><span class="box"></span><span><b class="block">Startaktion läuft</b><span class="text-[.84rem] text-muted">Erste Wohnung kostenlos. Endet von selbst, wenn kein Platz mehr frei oder das Datum vorbei ist.</span></span></label>' +
@@ -236,17 +236,29 @@
     $('#ef').onsubmit = async e => { e.preventDefault(); try { await api('einstellungen', { method: 'PUT', json: lese() }); toast('Gespeichert. Die Website zeigt die neuen Werte nach spätestens einer Minute.'); einstellungen(); } catch (er) { fehler(er); } };
   }
 
-  /* ---------- Start und Wege ---------- */
+  /* ---------- Gerüst für alle Bereiche ---------- */
+  const WEGE = [];
+  window.PCA = { $, $$, esc, api, toast, fehler, datum, zeit, heute, app: () => app, weg: (muster, fn, nav) => WEGE.push({ muster, fn, nav }), PREISE,
+    ladeBestellungen: ladeListe, bestellungen: () => S.liste };
   async function weg() {
-    const h = location.hash.replace(/^#\/?/, '');
-    $$('[data-nav]').forEach(a => a.classList.toggle('on', (a.dataset.nav === 'einstellungen') === (h === 'einstellungen')));
+    const h = location.hash.replace(/^#\/?/, ''), [pfad, qs] = h.split('?'), q = new URLSearchParams(qs || '');
     window.scrollTo(0, 0);
-    if (h === 'einstellungen') return einstellungen();
-    if (h.startsWith('b/')) return detail(decodeURIComponent(h.slice(2)));
-    try { await ladeListe(); liste(); } catch (e) { app.innerHTML = '<div class="card p-6 max-w-[640px]"><b class="font-display uppercase text-[1.5rem]">Der Admin-Bereich ist nicht erreichbar</b><p class="mt-2 text-ink2">' + esc(e.message) + '</p></div>'; }
+    let ziel = null, m = null, nav = '';
+    if (pfad === 'bestellungen') { nav = 'bestellungen'; ziel = async () => { await ladeListe(); liste(); }; }
+    else if (pfad.startsWith('b/')) { nav = 'bestellungen'; ziel = () => detail(decodeURIComponent(pfad.slice(2))); }
+    else if (pfad === 'einstellungen') { nav = 'einstellungen'; ziel = einstellungen; }
+    else for (const w of WEGE) { m = typeof w.muster === 'string' ? (w.muster === pfad ? [pfad] : null) : w.muster.exec(pfad); if (m) { nav = w.nav; ziel = () => w.fn(m, q); break; } }
+    if (!ziel) { nav = 'heute'; const w = WEGE.find(x => x.muster === ''); ziel = w ? () => w.fn([''], q) : async () => { await ladeListe(); liste(); }; }
+    $$('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === nav));
+    try { await ziel(); } catch (e) { app.innerHTML = '<div class="card p-6 max-w-[640px]"><b class="font-display uppercase text-[1.5rem]">Der Admin-Bereich ist nicht erreichbar</b><p class="mt-2 text-ink2">' + esc(e.message) + '</p></div>'; }
   }
   window.addEventListener('hashchange', weg);
-  // Liste alle 2 Minuten auffrischen, solange sie offen ist
-  setInterval(() => { if (!location.hash.replace(/^#\/?/, '') && !document.hidden && document.activeElement && document.activeElement.id !== 'q') ladeListe().then(liste).catch(() => {}); }, 120000);
-  weg();
+  // Zähler „Neu“ in der Navigation und offene Liste alle 2 Minuten auffrischen
+  setInterval(() => {
+    if (document.hidden) return;
+    const h = location.hash.replace(/^#\/?/, '');
+    if (h === 'bestellungen' && document.activeElement && document.activeElement.id !== 'q') ladeListe().then(liste).catch(() => {});
+    else ladeListe().catch(() => {});
+  }, 120000);
+  document.addEventListener('DOMContentLoaded', () => { ladeListe().catch(() => {}); weg(); });
 })();

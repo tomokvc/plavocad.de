@@ -62,8 +62,27 @@ Der Worker prüft die Anmeldung zusätzlich selbst (Signatur, Anwendung, Adresse
 4. In der Bestellung „Bestätigen“: Liefertermin prüfen, senden → Auftragsbestätigung kommt per Mail.
 5. Unter **Einstellungen** im Admin einen Preis ändern → Startseite neu laden → neuer Preis sichtbar.
 
-## 5. Wo was liegt
+## 5. Büro im Admin (seit November 2026)
+
+Das frühere Büro-Tool ist jetzt Teil von plavocad.de/admin: Heute, Kunden, Akquise, Belege (Angebote und Rechnungen).
+
+1. **Firmendaten:** Admin → Einstellungen → Firma und Belege. Steuernummer eintragen, sobald das Finanzamt sie geschickt hat (ohne sie lässt sich keine Rechnung festschreiben), dazu IBAN und Bank.
+2. **Makler-Liste:** Admin → Akquise → Liste importieren. Aus Excel „CSV UTF-8“ speichern, aus Numbers „Exportieren → CSV“, oder die Tabelle direkt in das Feld kopieren.
+3. **Morgen-Mail:** kommt gegen 7 Uhr an kontakt@plavocad.de, nur wenn etwas ansteht. Abschalten unter Einstellungen → Firma und Belege. Der zweite Zeitplan („0 6 * * *“) steht bereits in wrangler.jsonc.
+4. **Altes Büro-Tool abschalten:** Cloudflare → Workers & Pages → Projekt des Büro-Tools (z. B. „plavocad-buero“) → Settings → Delete project. Falls dafür eine eigene Access-Anwendung existiert, unter Zero Trust → Access → Applications ebenfalls löschen. Darin lagen nur Testdaten.
+
+So läuft ein Auftrag jetzt durch:
+- Bestellung kommt → Kunde wird automatisch angelegt oder zugeordnet (über die E-Mail-Adresse).
+- „Auftrag bestätigen“ → „Lieferung senden“ → „Rechnung erstellen“ (Positionen und Preis kommen aus der Bestellung) → Anschrift ergänzen → „Festschreiben“ (lückenlose Nummer RE-Jahr-001 …) → „Per E-Mail senden“ (PDF wird im Browser erzeugt, Blindkopie an dich).
+- Zahlung eingegangen → „Zahlung erfassen“ → Rechnung und Bestellung sind „Bezahlt“.
+- Fehler in einer festgeschriebenen Rechnung → „Stornieren“ (eigene Stornorechnung), danach eine neue Rechnung.
+- Anfrage einer Hausverwaltung → „Angebot erstellen“ → senden → bei Zusage „Angenommen“ → nach Lieferung „In Rechnung übernehmen“.
+
+Aufbewahrung: Festgeschriebene Rechnungen werden nie automatisch gelöscht. Speichere trotzdem jedes PDF zusätzlich in deiner Ablage (z. B. iCloud-Ordner „PlavoCAD/Rechnungen/2026“), 8 Jahre lang.
+
+## 6. Wo was liegt
 
 - Bestellungen/Anfragen: D1-Datenbank `plavocad`, Tabelle `bestellungen` (ohne Dateianhänge; Pläne kommen nur per Mail).
-- Preise, Startaktion, Lieferzeit, Pause: Tabelle `einstellungen`; die Website liest sie über `/api/einstellungen`.
-- Rechnungen und Angebote: weiterhin im Büro-Tool. Im Admin gibt es je Bestellung „Ins Büro-Tool“ (CSV-Export für den Import dort).
+- Kunden und Akquise: Tabelle `kontakte`. Angebote, Rechnungen, Stornorechnungen: Tabelle `belege`, Nummernkreise in `nummern`.
+- Preise, Startaktion, Lieferzeit, Pause, Firmendaten: Tabelle `einstellungen`; die Website liest Preise über `/api/einstellungen`.
+- Löschfristen (nachts automatisch): Anfragen ohne Auftrag nach 6 Monaten, abgeschlossene Bestellungen nach 12 Monaten, Akquise-Kontakte mit „Kein Interesse“ nach 6 Monaten. Rechnungen nie.
