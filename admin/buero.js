@@ -294,7 +294,10 @@
     try {
       let k = null; if (kontakt && kontakt.id) k = (await api('kontakte/' + kontakt.id)).k;
       const kaeufer = { firma: (k && k.firma) || b.firma || '', name: (k && k.name) || b.name || '', strasse: (k && k.strasse) || '', plz: (k && k.plz) || '', ort: (k && k.ort) || '', mail: (k && k.mail) || b.mail || '' };
-      const r = await api('belege', { method: 'POST', json: { art, kontakt_id: k ? k.id : null, bestell_nr: b.nr, objekt: b.objekt || '', kaeufer, positionen: positionenAus(b), leistung: art === 'rechnung' ? geliefertAm(b) : '' } });
+      const pos = positionenAus(b), gratis = art === 'rechnung' && !(pos.reduce((s, p) => s + p.menge * p.preis, 0) > 0.004);
+      const j = { art, kontakt_id: k ? k.id : null, bestell_nr: b.nr, objekt: b.objekt || '', kaeufer, positionen: pos, leistung: art === 'rechnung' ? geliefertAm(b) : '' };
+      if (gratis) j.text_aus = 'Der Rechnungsbetrag beträgt 0,00 €, es ist keine Zahlung erforderlich. Für weitere Aufträge gelten die Preise auf plavocad.de.';
+      const r = await api('belege', { method: 'POST', json: j });
       toast(art === 'rechnung' ? 'Rechnungsentwurf angelegt. Bitte prüfen und festschreiben.' : 'Angebot angelegt. Bitte prüfen und senden.');
       location.hash = '#/beleg/' + r.beleg.id;
     } catch (e) { fehler(e); }
@@ -345,6 +348,7 @@
       : b.art === 'storno' ? 'Stornorechnung zu ' + esc(bezugNr) + '. Schick sie dem Kunden, damit seine Buchhaltung stimmt.'
       : !fest ? 'Entwurf. Prüfen, dann festschreiben: Erst dann bekommt die Rechnung ihre Nummer und lässt sich nicht mehr ändern.'
       : b.status === 'storniert' ? 'Storniert' + (r.storno ? ' durch <a class="underline" href="#/beleg/' + r.storno.id + '">' + esc(r.storno.nr) + '</a>' : '') + '.'
+      : b.status === 'bezahlt' && !(b.summe > 0) ? 'Rechnung über 0,00 €, keine Zahlung nötig. Schick sie dem Kunden als Beleg.'
       : b.status === 'bezahlt' ? 'Bezahlt am ' + tagText(b.bezahlt_am) + ' (' + eur(b.bezahlt_betrag) + ').'
       : (b.versendet ? 'Verschickt ' + zeit(b.versendet) + '. ' : 'Noch nicht verschickt. ') + 'Fällig am ' + tagText(b.faellig) + (ueberfaellig(b) ? ', überfällig.' : '.');
     app().innerHTML = '<p class="mb-4"><a class="font-mono text-[.8rem] text-blue underline underline-offset-4" href="#/belege">← Alle Belege</a>' +
@@ -465,7 +469,7 @@
           const k = b.kaeufer || {}, an = k.mail || '', anrede = 'Guten Tag' + (k.name ? ' ' + k.name : '') + ',';
           const vorlage = angebot ? { betreff: 'Angebot ' + b.nr + (b.objekt ? ' · ' + b.objekt : '') + ' · PlavoCAD', text: anrede + '\n\nanbei mein Angebot ' + b.nr + (b.objekt ? ' für ' + b.objekt : '') + ' über ' + eur(b.summe) + '. Es gilt bis zum ' + tagText(b.gueltig) + '.\n\nWenn es passt, genügt eine kurze Antwort auf diese E-Mail.' + GRUSS }
             : b.art === 'storno' ? { betreff: 'Stornorechnung ' + b.nr + ' zu ' + bezugNr + ' · PlavoCAD', text: anrede + '\n\nanbei die Stornorechnung ' + b.nr + ' zur Rechnung ' + bezugNr + '. Die Rechnung ' + bezugNr + ' ist damit aufgehoben.' + GRUSS }
-            : { betreff: 'Rechnung ' + b.nr + (b.objekt ? ' · ' + b.objekt : '') + ' · PlavoCAD', text: anrede + '\n\nanbei die Rechnung ' + b.nr + ' über ' + eur(b.summe) + (b.objekt ? ' für ' + b.objekt : '') + '. Bitte überweisen Sie den Betrag bis zum ' + tagText(b.faellig) + '.\n\nVielen Dank für den Auftrag.' + GRUSS };
+            : { betreff: 'Rechnung ' + b.nr + (b.objekt ? ' · ' + b.objekt : '') + ' · PlavoCAD', text: anrede + '\n\nanbei die Rechnung ' + b.nr + ' über ' + eur(b.summe) + (b.objekt ? ' für ' + b.objekt : '') + (b.summe > 0 ? '. Bitte überweisen Sie den Betrag bis zum ' + tagText(b.faellig) + '.' : '. Im Rahmen der Startaktion ist keine Zahlung nötig, die Rechnung dient Ihnen als Beleg.') + '\n\nVielen Dank für den Auftrag.' + GRUSS };
           zeigeBox('<b class="font-display uppercase text-[1.3rem]">' + ART[b.art] + ' per E-Mail</b><div class="mt-3 grid gap-3 max-w-[760px]">' +
             '<label class="field"><span class="lbl">An</span><input class="inp" type="email" id="s-an" value="' + esc(an) + '"></label>' +
             '<label class="field"><span class="lbl">Betreff</span><input class="inp" id="s-be" value="' + esc(vorlage.betreff) + '"></label>' +

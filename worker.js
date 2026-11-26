@@ -660,7 +660,7 @@ function pflichtangaben(b, F) {
   if (!String(b.leistung || '').trim()) fehlt.push('Leistungsdatum oder Leistungszeitraum');
   const pos = b.positionen || [];
   if (!pos.length || pos.some(p => !p.text)) fehlt.push('Mindestens eine Position mit Beschreibung');
-  if (!(b.summe > 0)) fehlt.push('Rechnungsbetrag größer als 0 €');
+  if (!(b.summe >= 0)) fehlt.push('Rechnungsbetrag nicht negativ (Korrekturen nur über eine Stornorechnung)');
   return fehlt;
 }
 // Lückenlose Nummer: Zähler und Beleg werden in einem Schritt (Transaktion) geschrieben
@@ -886,14 +886,19 @@ async function buero(request, env, db, teile, m) {
         if (fehlt.length) return json({ ok: false, error: 'Es fehlen Pflichtangaben: ' + fehlt.join(', ') + '.', fehlt }, 400);
         const z = t(), vk = { name: F.name, inhaber: F.inhaber, strasse: F.strasse, plz: F.plz, ort: F.ort, tel: F.tel, mail: F.mail, web: F.web, steuernr: F.steuernr, ustid: F.ustid,
           bank: F.bank, iban: F.iban, bic: F.bic, kleinunternehmer: F.kleinunternehmer };
-        const r = await db.prepare("UPDATE belege SET festgeschrieben = ?, status = 'offen', verkaeufer = ?, faellig = ?, geaendert = ? WHERE id = ? AND festgeschrieben = ''")
-          .bind(z, JSON.stringify(vk), plusTage(b.datum, F.zahlungsziel), z, b.id).run();
+        // Rechnung über 0 € (z. B. Startaktion): nichts zu zahlen, deshalb gleich erledigt und ohne Fälligkeit
+        const nullBetrag = !(b.summe > 0);
+        const r = await db.prepare("UPDATE belege SET festgeschrieben = ?, status = ?, verkaeufer = ?, faellig = ?, bezahlt_am = ?, geaendert = ? WHERE id = ? AND festgeschrieben = ''")
+          .bind(z, nullBetrag ? 'bezahlt' : 'offen', JSON.stringify(vk), nullBetrag ? '' : plusTage(b.datum, F.zahlungsziel), nullBetrag ? b.datum : (b.bezahlt_am || ''), z, b.id).run();
         if (!r.meta || r.meta.changes !== 1) return json({ ok: false, error: 'Die Rechnung wurde gerade schon festgeschrieben.' }, 409);
       }
       let nr = b.nr;
       if (!nr) nr = await nummerVergeben(db, b.id, 'RE', +b.datum.slice(0, 4));
       const neu = await belegLaden(db, b.id);
-      if (!fest) { belegVermerk(neu, 'Festgeschrieben als ' + nr); await belegSpeichern(db, neu); await kontaktVermerk(db, neu.kontakt_id, 'Rechnung ' + nr + ' über ' + pcEur(neu.summe)); }
+      if (!fest) {
+        belegVermerk(neu, 'Festgeschrieben als ' + nr); await belegSpeichern(db, neu); await kontaktVermerk(db, neu.kontakt_id, 'Rechnung ' + nr + ' über ' + pcEur(neu.summe));
+        if (!(neu.summe > 0)) await bestellVermerk(db, neu.bestell_nr, 'Rechnung ' + nr + ' über 0,00 € (keine Zahlung nötig)', 'bezahlt');
+      }
       return json({ ok: true, beleg: neu });
     }
     if (teile[2] === 'storno' && m === 'POST') {
