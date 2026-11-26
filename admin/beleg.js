@@ -75,9 +75,9 @@
 .pcdoc .sum td { padding:2mm 1.4mm 0; border-top:1.4pt solid var(--bl); font-weight:600; }
 .pcdoc .sum td.n { text-align:right; font:500 12pt "IBM Plex Mono",monospace; color:var(--bl); }
 .pcdoc .ku { font-size:8.4pt; color:var(--i2); margin-top:2.5mm; }
-.pcdoc .fuss { position:absolute; left:25mm; right:16mm; bottom:10mm; }
-.pcdoc .fi { display:flex; gap:9mm; font-size:6.6pt; line-height:1.5; color:var(--i2); border-top:.4pt solid var(--ln); padding-top:1.6mm; margin-bottom:3mm; }
-.pcdoc .pk { margin-left:auto; width:140mm; display:grid; grid-template-columns:1.7fr 1.2fr 1fr .8fr .6fr; border:.9pt solid var(--i); }
+.pcdoc .fuss { position:absolute; left:25mm; right:16mm; bottom:14mm; }
+.pcdoc .fi { display:grid; grid-template-columns:repeat(3,1fr); gap:0; font-size:6.6pt; line-height:1.5; color:var(--i2); border-top:.4pt solid var(--ln); padding-top:1.6mm; margin-bottom:3mm; }
+.pcdoc .pk { width:100%; display:grid; grid-template-columns:1.7fr 1.2fr 1fr .8fr .6fr; border:.9pt solid var(--i); }
 .pcdoc .pk div { padding:1.2mm 1.8mm; border-left:.45pt solid var(--i); min-width:0; }
 .pcdoc .pk div:first-child { border-left:0; }
 .pcdoc .pk b { display:block; font:500 7.2pt "IBM Plex Mono",monospace; overflow-wrap:anywhere; }
@@ -147,7 +147,7 @@
   function schrift(doc, fam, st, pt, c = 'i') { doc.setFont(fam, st); doc.setFontSize(pt); farbe(doc, c); }
   function lab(doc, text, x, y, opt) { schrift(doc, 'PlexMono', 'normal', 6.2, 'pb'); doc.setCharSpace(0.25); doc.text(String(text).toUpperCase(), x, y, opt); doc.setCharSpace(0); }
 
-  function stempelZeichnen(doc, t) { farbe(doc, 'rt', 'draw'); doc.setLineWidth(0.4); schrift(doc, 'PlexMono', 'bold', 9.5, 'rt'); doc.setCharSpace(1); const w = doc.getTextWidth(t) + 6; doc.rect(25, 16, w, 7); doc.text(t, 28, 21); doc.setCharSpace(0); }
+  function stempelZeichnen(doc, t) { farbe(doc, 'rt', 'draw'); doc.setLineWidth(0.4); schrift(doc, 'PlexMono', 'bold', 9.5, 'rt'); doc.setCharSpace(1); const w = doc.getTextWidth(t) + (t.length - 1) * 1 + 6; /* Zeichenabstand zählt getTextWidth nicht mit */ doc.rect(25, 16, w, 7); doc.text(t, 28, 21); doc.setCharSpace(0); }
   // Kopf mit Logo, Falzmarken, Absenderzeile, Anschrift und Infokasten (DIN 5008 Form B)
   function kopf(doc, I, info, stempel) {
     if (window.PC_PDF_LOGO) doc.addImage(window.PC_PDF_LOGO, 'PNG', 210 - 16 - 72, 12, 72, 72 * 76 / 384);
@@ -171,16 +171,15 @@
     }
   }
   // Fuß mit Firmenangaben und Plankopf (Objekt, Inhalt, Nr., Stand, Blatt)
+  // Oben drei Spalten (Firma, Kontakt, Bank) auf festen Dritteln, darunter der Plankopf über die volle Breite
   function fuss(doc, I, blatt, gesamt) {
-    const y0 = 297 - 34;
+    const y0 = 297 - 41, spalten = I.fuss.filter(z => z.length), sw = 169 / 3;
     farbe(doc, 'ln', 'draw'); doc.setLineWidth(0.15); doc.line(25, y0, 194, y0);
-    let x = 25;
-    I.fuss.filter(z => z.length).forEach(z => {
-      z.forEach((t, j) => { schrift(doc, 'PlexSans', j === 0 ? 'bold' : 'normal', 6.6, j === 0 ? 'i' : 'i2'); doc.text(String(t), x, y0 + 3.4 + j * 3); });
-      schrift(doc, 'PlexSans', 'normal', 6.6); x += Math.max(...z.map(t => doc.getTextWidth(String(t)))) + 9;
+    spalten.forEach((z, i) => {
+      z.slice(0, 4).forEach((t, j) => { schrift(doc, 'PlexSans', j === 0 ? 'bold' : 'normal', 6.6, j === 0 ? 'i' : 'i2'); doc.text(String(t), 25 + i * sw, y0 + 3.6 + j * 3); });
     });
     const zellen = [['Objekt', I.objekt, 1.7], ['Inhalt', I.titel, 1.2], ['Nr.', I.nr || 'Entwurf', 1], ['Stand', I.stand, 0.8], ['Blatt', String(blatt).padStart(2, '0') + (gesamt > 1 ? ' / ' + String(gesamt).padStart(2, '0') : ''), 0.6]];
-    const w = 140, x0 = 194 - w, y = 297 - 22, h = 11, sum = zellen.reduce((s, z) => s + z[2], 0);
+    const w = 169, x0 = 25, y = 297 - 25, h = 11, sum = zellen.reduce((s, z) => s + z[2], 0);
     farbe(doc, 'i', 'draw'); doc.setLineWidth(0.32); doc.rect(x0, y, w, h);
     let cx = x0;
     zellen.forEach((z, i) => {
