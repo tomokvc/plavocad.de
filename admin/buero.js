@@ -405,7 +405,7 @@
       $('#b-plus').onclick = () => { lese(); b.positionen.push({ text: '', menge: 1, einheit: 'Pauschal', preis: 0 }); posZeichnen(); const t = $$('#b-pos textarea').pop(); if (t) t.focus(); };
       $('#b-kat').onchange = e => {
         const v = e.target.value; if (!v) return; lese();
-        if (v === 'startaktion') b.positionen.push({ text: 'Startaktion: erste Wohnung inkl. Flächen kostenlos', menge: 1, einheit: 'Wohnung', preis: -(C.preise.wohnung + C.preise.flaechen) });
+        if (v === 'startaktion') b.positionen.push({ text: 'Startaktion: Grundriss inkl. Flächen kostenlos', menge: 1, einheit: 'Wohnung', preis: -(C.preise.wohnung + C.preise.flaechen) });
         else { const x = KATALOG.find(y => y[0] === v); b.positionen.push({ text: x[1], menge: 1, einheit: x[2], preis: C.preise[v] }); }
         e.target.value = ''; posZeichnen(); dirty = true; lese(); vorschau();
       };

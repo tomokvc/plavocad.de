@@ -157,7 +157,7 @@ function pcBestellung(e, C, jetzt) {
   if (express) { add('Express', P.express); wt = C.lieferung.express; }
   if (e.sk) add('Vorlage nur Handskizze', P.skizze);
   var ak = pcAktion(C, jetzt), aktion = !!e.aktion && ak.aktiv;
-  if (aktion) add('Startaktion · erste ' + (t === 'haus' ? 'Ebene inkl. Flächen' : t === 'gewerbe' ? 'Einheit' : 'Wohnung') + ' gratis', -Math.min(frei, total));
+  if (aktion) add('Startaktion: Grundriss ' + (t === 'haus' ? 'erste Ebene' : t === 'gewerbe' ? 'erste Einheit' : 'erste Wohnung') + ' inkl. Flächen kostenlos', -Math.min(frei, total));
   var r = { typ: t, L: L, total: Math.max(0, Math.round(total * 100) / 100), units: units, werktage: wt, etappen: etappen, pkg: pkg, exOk: exOk, express: express, aktion: aktion, moebliert: e.mb !== false };
   r.termin = pcTermin(r, C, jetzt);
   return r;
