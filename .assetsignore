@@ -1,7 +1,8 @@
- wrangler.jsonc
-   .assetsignore
-   .git
-   .github
-   README.md
-   functions
-   js/site.js
+wrangler.jsonc
+worker.js
+.assetsignore
+.git
+.github
+README.md
+functions
+js/site.js
